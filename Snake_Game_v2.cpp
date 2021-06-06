@@ -118,7 +118,10 @@ vector<int> consolemid(){
 
 char retch(){
     gotoXY(bs+1, 20);
-    return getch();
+    char kop=getch();
+    gotoXY(bs+1, 20);
+    cout<<"   ";
+    return kop;
 }
 
 void gotoXY(int row, int col){
@@ -134,8 +137,10 @@ void gotoXY(int row, int col, string str){
     int coll = col + changepos[1]/2 - 21; 
     int roww = row + changepos[0]/2 - 10;
     printf("\033[%d;%dH",roww,coll);
+    if(gameover){cout<<str;return;}
+    if(str!="+" and gameover==0){
 	cout<<str;
-    gotoXY(bs+1,20);
+    gotoXY(bs+1,20);}
 }
 void gotoXY(int row, int col, char str){
     vector<int> changepos = prevconsize = consolemid();
@@ -323,8 +328,8 @@ void stages(int key)
 void snake(int key){
     if(key == 1){
         for(int i=0; i<snakelen-1; i++){
-            if(i&1)gotoXY(snakeposx[i], snakeposy[i], "o");
-            else gotoXY(snakeposx[i], snakeposy[i], "ơ");
+            if(i&1)gotoXY(snakeposx[i], snakeposy[i], "ợ");
+            else gotoXY(snakeposx[i], snakeposy[i], "ờ");
         }
         gotoXY(snakeposx[snakelen-1], snakeposy[snakelen -1], "O");
     }
@@ -345,7 +350,7 @@ void snake(int key){
 void fruit(int key){
     if(key == 1){
         totalboard[fruitposx][fruitposy] = 2;
-        gotoXY(fruitposx, fruitposy, "#");
+        gotoXY(fruitposx, fruitposy, "ↈ");
     }
     else if(key == 0){
         gotoXY(fruitposx, fruitposy); cout<<" ";
@@ -390,7 +395,7 @@ void fruit_eaten(int x, int y){
     snakeposy[snakelen] = y;
 
     gotoXY(x, y);totalboard[x][y]=1; cout<<"O";
-    gotoXY(snakeposx[snakelen-1], snakeposy[snakelen-1], (snakelen-1+f)&1?(char)248:'o'); 
+    gotoXY(snakeposx[snakelen-1], snakeposy[snakelen-1], (snakelen-1+f)&1?'ờ':'ợ'); 
 
     snakelen++;
     fruit(3);
@@ -425,11 +430,13 @@ void key_press(){
     else if(cs=='a')y-=2;
     else if(cs=='d')y+=2;
 
-    if(uur and x==10 and y==34){
+    if(uur and x==10 and y==30){
         move_snake(x,y);
         uur = 0;
     }
     else if(totalboard[x][y] == 1){
+        cout<<x<<' '<<y;getch();
+        gotoXY(bs+1,20);cout<<"         ";
         gotoXY(snakeposx[snakelen-1], snakeposy[snakelen-1], 'X');
         gameover=1;
     }
@@ -458,7 +465,7 @@ void game(bool key){
         snake(3);
         fruit(3);
         while(gameover == 0){
-            gotoXY(-2, 20, " ");
+            gotoXY(-2, 20, "+");
             cout<<point<<"/"<<targetpoint[stageh];
             snake(1);
             fruit(1);
@@ -470,12 +477,14 @@ void game(bool key){
             gotoXY(-2, 20);cout<<"                 ";
             brdr(1);
         }
+        gotoXY(-2, 20);cout<<"                 ";
         brdr(0);
         gotoXY(10, 10, point==targetpoint[stageh]?"You passed!    ":"Game Over!     ");cout<<point<<'/'<<targetpoint[stageh];
         gotoXY(12, 10, "Press j to go to homepage");
         gotoXY(14, 10, "Press x to go to next level");
         gameover = 0;
         point = 0;
+        game(0);
         cs = retch();
         for(;cs!='j' and cs!='x'; cs=retch());
         gotoXY(10, 10);cout<<"                              ";
