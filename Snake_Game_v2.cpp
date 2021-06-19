@@ -1,645 +1,617 @@
 #include<bits/stdc++.h>
 #include<conio.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
-using  namespace std;
-#define ppr cout<<(char)219
-struct winsize w;
-#define jjj ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+using namespace std;
+int wincol, winrow;
+int exit_the_game=0;
+#define sp(r, c, k) totalboard[r][c]=k
+#define br 23
+#define bc 45
+int create_new=1, erase=0, draw=2, f, reset_row, reset_col, reset = 7;
+int totalboard[br][bc];
+    int fruits=3, snakes=4, eagles = 5;
 
-
-
-// int pageno;
-
-int bs = 23, totalboard[500][500], point, fruitposx, fruitposy, h=1,stageunlocked[4], stagenumber=1;
-// char border = 219, c, ch;
-int highscore = 0, stagepoint[6]={100,50,250,200,200,150} ;
-char border = 219;
-
-// board
-int bdc = 42;
-
-
-//home
-vector<string> homepagecontent = {"Start New Game", "Help", "Exit"};
-int homepagecontentpos, homeorcont;
-
-
-//continue_game
-vector<string> continuecontent = {"Continue", "Start New Game", "Help", "Exit"};
-int continuecontentpos;
-
-
-
-// level
-int levelh;
-
-
-// Stage ***
-vector<string> stagestr = {"Normal", "Campaign", "Tunnel", "Apartment", "Maze"};
-int stageh;
-int targetpoint[6] = {50, 60, 50, 50, 50};
-
-
-// help
-vector<string> helpstr = { 
-"HELP", 
-"________________", 
-" ",
-"\'w\' -> Navigate DOWN", 
-"\'s' -> Navigate UP", 
-"\'a\' -> Navigate LEFT",
-"\'d\' -> Navigate RIGHT",
-"\'x\' -> Back to main menu", " ",
-"The snake is hunting for the", "food which looks like '#' and", "each time it eats the food, it", "becomes larger and a new food",
-"grows somewhere else.", "But if the snake hit the wall", "or its body, then it dies."
-};
-
-
-
-// exit the game
-bool etg;
-
-
-// game
-bool gameover;
-char cs, ch;
-
-
-
-// Snake
-int snakeposx[1000], snakeposy[1000], snakelen = 9, uur;
-bool f;
-
-
-
-vector<int> prevconsize;
-
-
-
-vector<int> consolemid();
-void gotoXY(int,int);
-void gotoXY(int,int,string);
-void gotoXY(int,int,char);
-void drawconsole();
-void homepage(bool);
-void level(bool);
-void stage(bool);
-void help(bool);
-void game(bool);
-void continue_game(bool);
-
-void stages(int);
-void brdr(int);
-void Draw_border(int);
-
-
-void snake(int);
-void fruit(int);
-void move_snake(int, int);
-void fruit_eaten(int, int);
-void game(bool);
-char retch();
-
-
-
-void Control(int);
-
-
-
-
-
-
-vector<int> consolemid(){
-    jjj
-    return {w.ws_row, w.ws_col};
+void nothing(){
+    return;
 }
+void new_console_size();
+void print(int, int, string);
+void print(int, int, char);
+void erasef(int, int, string);
+void erasef(int, int);
+void draw_afresh();
 
 
 char retch(){
-    gotoXY(bs+1, 20);
-    char kop=getch();
-    gotoXY(bs+1, 20);
-    cout<<"   ";
-    return kop;
-}
-
-void gotoXY(int row, int col){
-    int coll = col + prevconsize[1]/2 - 21; 
-    int roww = row + prevconsize[0]/2 - 10;
-    printf("\033[%d;%dH",roww,coll);
-
+    print(br+1, bc/2, "");
+    char kkkk = getch();
+    print(br+1, bc/2, "  ");
+    return kkkk;
 }
 
 
-void gotoXY(int row, int col, string str){
-    vector<int> changepos = prevconsize = consolemid();
-    int coll = col + changepos[1]/2 - 21; 
-    int roww = row + changepos[0]/2 - 10;
-    printf("\033[%d;%dH",roww,coll);
-    if(gameover){cout<<str;return;}
-    if(str!="+" and gameover==0){
-	cout<<str;
-    gotoXY(bs+1,20);}
+void game(int);
+    bool tw;
+    ///////////////////// mode /////////////////
+    bool survival = 1;
+    long long highscore;
+    int level;
+    FILE* storepoint;
+
+
+        
+void snake(int);
+    long long snaketail, snakehead, snakelen;
+    map<long long, int> snakerow, snakecol;
+void fruit(int);
+    int fruitrow, fruitcol, point = 5;
+
+void eagle(int);
+    map<long long, int> eaglerow, eaglecol;
+    int eaglecount = 1;
+void board();
+    int stageh=1, normal=1, campaign=2, tunnel=3, apartment=4;
+bool key_press();
+    char cs='d', ch='d';
+    void fruit_eaten(int, int);
+    void move_snake(int, int);
+    void eagle_eaten(int, int);
+
+void lives_and_points(int);
+        vector<long long> lives={20, 20, 20, 20, 20, 20};
+        vector<long long> points(6);
+void printarr(vector<string>);
+    vector<string> homestr={"Continue", "New Game", "High Score", "Help", "Exit"};
+    vector<string> helpstr = { 
+"HELP", 
+"________________", 
+" ",
+"Navigation",
+"w",
+"a s d",
+" ",
+"The snake is hunting frog", "but being hunted by eagle", "each time it eats the frog or the", "eagle, it becomes larger and more frog",
+"or eagle arise somewhere else.", "If it hit the wall or its body", "or its lives end, then it dies."
+};
+    vector<string> levelstr = {"Fast", "Slow", "Sloth"};
+    int pointpos;
+
+void control();
+    
+
+
+
+
+void move_snake(int row, int col){
+    print(snakerow[snaketail], snakecol[snaketail], "erase");
+    print(snakerow[snakehead], snakecol[snakehead], (snakelen-1+f)&1?"ờ":"ợ"); f=!f;
+
+    snaketail++;
+    snakehead++; 
+
+    snakerow[snakehead] = row;
+    snakecol[snakehead] = col;
+    print(row, col, "O");
+    print(br+1, bc/2, "  ");
 }
-void gotoXY(int row, int col, char str){
-    vector<int> changepos = prevconsize = consolemid();
-    int coll = col + changepos[1]/2 - 21; 
-    int roww = row + changepos[0]/2 - 10;
-    printf("\033[%d;%dH",roww,coll);
-	cout<<str;
-    printf("\033[22;20H");
+void fruit_eaten(int row, int col){
+    snakelen++;
+    lives[stageh]+=5;
+    lives[0]+=5;
+    points[stageh]++;
+    print(snakerow[snakehead], snakecol[snakehead], (snakelen-1+f)&1?"ờ":"ợ"); 
+    snakehead++;
+    snakerow[snakehead] = row;
+    snakecol[snakehead] = col;
+    print(row, col, "O");
+
+    fruit(create_new);
+    fruit(draw);
+ 
+    print(br+1, bc/2, "  ");
+
+}
+
+
+void eagle_eaten(int row, int col){
+    reset_row = row, reset_col = col;
+    eagle(reset);
+
+    eagle(create_new);
+    snakelen++;
+    lives[stageh]+=10;
+    lives[0]+=20;
+    // print(snakerow[snakehead], snakecol[snakehead], (snakelen-1+f)&1?"ờ":"ợ"); 
+    snakehead++;
+    snakerow[snakehead] = row;
+    snakecol[snakehead] = col-!(col&1);
+    snake(draw);
+    fruit(draw);
+    print(row, col-!(col&1), "O");
+
+
 }
 
 
 
 
-void Control(int pos){
-    if(pos == 0){   // homepage
-    homeorcont = 0;
-        homepagecontentpos=homepagecontentpos<0?2:homepagecontentpos;
-        homepagecontentpos=homepagecontentpos>2?0:homepagecontentpos;
-        homepage(1);
-        char c = retch();
-        if(c == 'w')homepagecontentpos--, homepagecontentpos=homepagecontentpos<0?2:homepagecontentpos;
-        else if(c == 's')homepagecontentpos++, homepagecontentpos=homepagecontentpos>2?0:homepagecontentpos;
-        else if(c == 'j'){
-            homepage(0);
-            if(homepagecontentpos == 0){
-                homepagecontentpos = 3;
+
+bool key_press(){
+    int row=snakerow[snakehead], col = snakecol[snakehead];
+
+    eagle(draw);
+    fruit(draw);
+    if(_kbhit()) cs = retch();
+
+
+    if(!(cs=='a' or cs=='s' or cs=='d' or cs=='w' or cs=='j'))cs = ch;
+    else if(cs+ch==234 or cs+ch==197)cs=ch;
+    else if(cs == 'j'){
+        system("clear");
+        control();
+        if(exit_the_game == 1)return 0;
+        draw_afresh();
+        retch();
+        cs = ch;
+    }
+    ch = cs;
+
+
+    if(cs=='w')row--;
+    else if(cs=='s')row++;
+    else if(cs=='a')col-=2;
+    else if(cs=='d')col+=2;
+
+
+    if(totalboard[row][col] == campaign) return 0;
+    else if(totalboard[row][col] == snakes) return 0;
+    else if(totalboard[row][col] == fruits)fruit_eaten(row, col);
+    else if(totalboard[row][col] == eagles)eagle_eaten(row, col);
+
+
+    
+    else{ 
+        if(totalboard[row][col] == normal){
+            if(col <= 0)col = bc-2;
+            else if(row == 0)row = br-2;
+            else if(row == br-1)row = 1;
+            else if(col >= bc-1)col = 1;
+        }
+        if(totalboard[row][col] == campaign)return 0;
+        else if(totalboard[row][col] == snakes)return 0;
+        else if(totalboard[row][col] == fruits)fruit_eaten(row, col);
+        else if(totalboard[row][col] == eagles)eagle_eaten(row, col);
+        else {
+            move_snake(row, col);
+        }
+    }
+
+    if(points[stageh] == point){lives_and_points(draw);return 0;}
+    if(survival){
+        
+        if(lives[0] <= 0){
+            return 0;
+        }
+    }
+    // eagle(draw);
+    return 1;
+}
+
+
+void game(int key){
+    if(exit_the_game == 1)return;
+
+    if (key == 1)
+    {
+        game(0);
+        board();
+        snake(draw);
+        fruit(draw);
+        while (tw = key_press())
+        {
+            new_console_size();
+            lives_and_points(draw);
+            usleep(70000+level*10000);
+        }
+        if(exit_the_game)return;
+        getch();
+        fruit(erase);
+        snake(erase);
+        system("clear");
+        while(1){
+                if(_kbhit())
+                    cs = getch();
+                    if(cs == 'j')break;
+                new_console_size();
+                if(points[stageh] == point){
+                    if(cs == 'x')break;
+                    print(br/2-3, bc/2-10, "Stage complete!!!");
+                    if(survival)print(br/2-1, bc/2-12, "Remaining Lives = "),cout<<lives[0];
+                    else print(br/2-1, bc/2-12, "Remaining Lives = "),cout<<lives[stageh];
+                    print(br/2+1, bc/2-16, "Press x to jump to next stage");
+                    print(br/2+3, bc/2-14, "Press j to go to homepage");
+                    print(br+2, bc/2, "");
+                }
+                else{
+                    print(br/2-1, bc/2-6, "You FAILED!!!");
+                    print(br/2+1, bc/2-13, "Press j to go to homepage");
+                    print(br+2, bc/2, "");
+                }
+                if(cs == 'j');
             }
-            Control(homepagecontentpos);
+        if(cs == 'x'){
+            stageh++;
+            if(survival)lives[0]+=stageh*2;
+            if(stageh == apartment+1){
+                print(br/2, bc/2-10, "All Stages Complete!!!");
+                if(highscore < lives[0]){
+                    highscore = lives[0];
+                    storepoint = fopen("Snake_Game_Score.txt", "w");
+                    fprintf(storepoint, "%d", highscore);
+                    fclose(storepoint);
+                }
+                usleep(200000);
+                return;
+                }
+            else game(1);
             return;
         }
-        else{
-            Control(pos);
-            return;
+        system("clear");
+    }
+    if(key == 0){
+        lives[0] = 20;
+        survival=1;
+        system("clear");
+        points = {0,0,0,0,0,0};
+        // lives = {0,0,0,0,0,0};
+        cs = ch = 'd';
+        tw = 1;
+        new_console_size();
+        snakelen = 9; eaglecount = 0;
+        snaketail = 0;
+        snakehead = 8;
+        memset(totalboard, 0, sizeof(totalboard));
+        snake(create_new);
+        fruit(create_new);
+        eagle(create_new);
+    }
+}
+
+
+void eagle(int key){
+    if(key == reset){
+        for(int i=0; i<eaglecount; i++){
+            if(eaglerow[i] == reset_row and eaglecol[i] == reset_col){
+                eaglerow[i] = rand()%(br-2)+1;
+                eaglecol[i] = ( (bc-rand()%4-4)/2 )*2+1;
+                if(totalboard[eaglerow[i]][eaglecol[i]]){
+                    eagle(reset);
+                    return;
+                }
+                else{
+                    sp(eaglerow[i], eaglecol[i], eagles);
+                    return;
+                }
+            }
         }
-        homepage(0);
-        Control(0);
-    }
-    if(pos == 1){   // Help
-        help(1);
-        for(char c = retch(); c-'j'; c=getch());
-        help(0);
-        Control(homeorcont);
-    }
-    if(pos == 2){   // Exit
-        etg = 1;
         return;
     }
-    if(pos == 3){   // Level
-        level(1);
-        char c = retch();
-        if(c == 'd')levelh+=levelh==2?0:1;
-        else if(c == 'a')levelh-=levelh==0?0:1;
-        else if(c == 'j'){
-            level(0);
-            Control(4);
+    if(key == create_new){
+        eaglerow[eaglecount] = rand()%(br-2)+1;
+        eaglecol[eaglecount] = ( (int)(bc-rand()%4-4)/2 )*2 + 1;
+        if(totalboard[eaglerow[eaglecount]][eaglecol[eaglecount]]){
+            eagle(create_new);
             return;
         }
         else{
-            Control(3);
+            sp(eaglerow[eaglecount], eaglecol[eaglecount], eagles);
+            eaglecount++;
             return;
         }
-        level(0);
-        Control(3);
     }
-    if(pos == 4){   // Stages
-        if(stageh==5)stageh=0;
-        stage(1);
-        char c = retch();
-        if(c == 'd' or c == 's')stageh=stageh==4?0:stageh+1;
-        else if(c == 'a' or c == 'w')stageh=stageh==0?4:stageh-1;
-        else if(c == 'j'){
-            stage(0);
-            game(0);
-
-            game(1);
-            return;
+    else if(key == draw){
+        for(int i=0; i<eaglecount; i++){
+            if(totalboard[eaglerow[i]][eaglecol[i]-2] == snakes){lives[stageh]--;lives[0]--;continue;}
+            print(eaglerow[i], eaglecol[i], "erase");
+            eaglecol[i]-=2;
+            if(eaglecol[i] <= 0 or totalboard[eaglerow[i]][eaglecol[i]] == campaign){
+                eaglerow[i] = rand()%(br-1)+1;
+                eaglecol[i] = bc - 4;
+                while(totalboard[eaglerow[i]][eaglecol[i]]){
+                    eaglerow[i] = rand()%(br-2)+1;
+                    eaglecol[i]-=2;
+                    if(eaglecol[i] <= 0)eaglecol[i]=bc-4;
+                }
+            }
+            print(br+1, bc/2, "         ");
+            print(eaglerow[i], eaglecol[i], "🦅");    
         }
-        else{
-            Control(4);
-            return;
-        }
-        stage(0);
-        Control(4);
     }
-    if(pos == 5){   // continue
-        homeorcont = 5;
-        if(continuecontentpos == -1)continuecontentpos=3;
-        if(continuecontentpos == 4)continuecontentpos=0;
-        continue_game(1);
-        char c = retch();
-        if(c == 'w')continuecontentpos--;
-        else if(c == 's')continuecontentpos++;
-        
-        if(continuecontentpos == -1)continuecontentpos=3;
-        if(continuecontentpos == 4)continuecontentpos=0;
-
-        if(c == 'j'){
-            continue_game(0);
-            if(continuecontentpos == 0){
-                return;
-            }
-            else if(continuecontentpos == 1){ // New Game -> Level
-                Control(3);
-            }
-            else if(continuecontentpos == 2){ // Level
-                Control(1);
-            }
-            else if(continuecontentpos == 3){ // Exit
-                continue_game(0);
-                Control(2);
-            }
-            return;
-        }
-        else{
-            Control(pos);
-            return;
-        }
-        continue_game(0);
-        Control(5);
-    }
-
+    if(totalboard[snakerow[snakehead]][snakecol[snakehead]] == eagles)eagle_eaten(snakerow[snakehead], snakecol[snakehead]);
+    snake(draw);
+    print(br+2, bc/2, "    ");
 }
 
-void stages(int key)
-{
-    if (key == 0)   // normal
-    {
-        for (int i = 0; i < bs; i++) gotoXY(i, 0, "|"), totalboard[i][0] = 3;
-        for (int i = 0; i < bs; i++) gotoXY(i, 2 * bs, "|"), totalboard[i][2 * bs] = 3;
-        for (int i = 0; i <= 2 * bs; i++) gotoXY(0, i, "_"), totalboard[0][i] = 3;
-        for (int i = 0; i <= 2 * bs; i++) gotoXY(bs - 1, i, "\'"), totalboard[bs - 1][i] = 3;
-    }
 
-    if (key == 1)   // Campaign
-    {
-        for (int i = 0; i <= 2 * bs; i++) gotoXY(0, i, border), totalboard[0][i] = 1;
-        for (int i = 0; i <= 2 * bs; i++) gotoXY(bs - 1, i, border), totalboard[bs - 1][i] = 1;
-        for (int i = 0; i < bs; i++) gotoXY(i, 0, border), totalboard[i][0] = 1;
-        for (int i = 0; i < bs; i++) gotoXY(i, 2 * bs, border), totalboard[i][2 * bs] = 1;
-    }
-
-    if (key == 2)   // Tunnel
-    { // **********************************************
-        stages(0);
-
-        string solid(10, border);
-        gotoXY(0, 0, solid);
-        gotoXY(bs - 1, 0, solid);
-        gotoXY(0, 2 * bs - 9, solid);
-        gotoXY(bs - 1, 2 * bs - 9, solid);
-        for (int i = 0; i < 10; i++) totalboard[0][i] = totalboard[bs - 1][i] = totalboard[0][2 * bs - 9 + i] = totalboard[bs - 1][2 * bs - 9 + i] = 1;
-
-        for (int i = 11; i <= bs + bs - 11; i++) gotoXY(6, i), cout << (char)border, totalboard[6][i] = 1;
-        for (int i = 11; i <= bs + bs - 11; i++) gotoXY(bs - 6, i), cout << (char)border, totalboard[bs - 6][i] = 1;
-    }
-
-    if (key == 3)   // Apartment
-    {
-        stages(0);
-        string s;
-        s += border;
-        for (int i = 0; i <= 2 * bs; i++) gotoXY(6, i, s), totalboard[6][i] = 1;
-        for (int i = 1; i <= 6; i++) gotoXY(i, 16, s), totalboard[i][16] = 1;
-        for (int i = 1; i <= 6; i++) gotoXY(i, 17, s), totalboard[i][17] = 1;
-        for (int i = 0; i <= 2 * bs; i++)
-            if (i < 13 or i > 19) gotoXY(bs - 6, i, s), totalboard[bs - 6][i] = 1;
-    }
-
-    if (key == 4)   // Maze
-    {
-        stages(3);
-        for (int i = bs - 6; i < bs; i++)
-            gotoXY(i, 20, (char)219), totalboard[i][20] = 1;
-        for (int i = bs - 6; i < bs; i++)
-            gotoXY(i, 21, (char)219), totalboard[i][21] = 1;
-        for (int i = 14; i < 30; i++)
-            gotoXY(bs - 1, i, (char)219), totalboard[bs - 1][i] = 1, totalboard[0][i] = 1;
-        for (int i = bs - 3; i < bs; i++)
-            gotoXY(i, 2 * bs - 1, (char)219), totalboard[i][2 * bs - 1] = 1;
-        for (int i = bs - 3; i < bs; i++)
-            gotoXY(i, 2 * bs, (char)219), totalboard[i][2 * bs] = 1, totalboard[i][0] = 1;
-    }
-}
 
 void snake(int key){
-    if(key == 1){
-        for(int i=0; i<snakelen-1; i++){
-            if(i&1)gotoXY(snakeposx[i], snakeposy[i], "ợ");
-            else gotoXY(snakeposx[i], snakeposy[i], "ờ");
-        }
-        gotoXY(snakeposx[snakelen-1], snakeposy[snakelen -1], "O");
-    }
-    else if(key == 0){
-        for(int i=0; i<snakelen; i++){
-            gotoXY(snakeposx[i], snakeposy[i]);cout<<" ";
+    if(key == create_new){
+        for(int i=0, j=snaketail; j<=snakehead; i++, j++){
+            snakerow[j]=10, snakecol[j]=11+i+i;
+            sp(10, 11+i+i, snakes);
         }
     }
-    else{
-        for(int i=0, j=0; i<9; i++, j+=2){
-            snakeposx[i] = 10;
-            snakeposy[i] = 16+j;
-            totalboard[10][16+j] = 1;
-        }
+    if(key == draw){
+        new_console_size();
+        for(int i=snaketail; i<=snakehead; i++)
+            print(snakerow[i], snakecol[i], i==snakehead?"O":i&1?"ợ":"ờ");
+    }
+    if(key == erase){
+        for(int i=snaketail; i<=snakehead; i++)
+            print(snakerow[i], snakecol[i], ' ');
     }
 }
+
+
 
 void fruit(int key){
-    if(key == 1){
-        totalboard[fruitposx][fruitposy] = 2;
-        gotoXY(fruitposx, fruitposy, "ↈ");
+    if(key == create_new){
+        int x = fruitrow = rand()%(br-2)+1;
+        int y = fruitcol = (rand()%( (bc-3)/2 )*2)+1;
+
+        if(totalboard[x][y] == 0)totalboard[x][y]=fruits;
+        else fruit(create_new);
     }
-    else if(key == 0){
-        gotoXY(fruitposx, fruitposy); cout<<" ";
+    else if(key == draw){
+        print(fruitrow, fruitcol, "🐸");
+        print(br+2, bc/2, "      ");
     }
-    else{
-            if(gameover){
-            totalboard[fruitposx][fruitposy] = 0;
-            gotoXY(fruitposx, fruitposy),cout<<' ';
-            return;}
-            totalboard[fruitposx][fruitposy] = 0;
-        fruitposy = rand()%(bs-1); fruitposy = 2*fruitposy+2;
-        fruitposx = rand()%(bs-2); fruitposx++;
-        int x = fruitposx;
-        int y = fruitposy;
-        if(totalboard[x][y])fruit(3);
-        else totalboard[x][y] = 2;
+    else if(key == erase){
+        if(totalboard[fruitrow][fruitcol]==fruits)print(fruitrow, fruitcol, "erase");
     }
 }
 
+void board()
+{
+    if (stageh == normal)
+    {
+        for (int i = 0; i < br; i++) print(i, -1, "🟩"), print(i, bc - 1, "🟩");
+        for (int i = -1; i < bc; i += 2) print(0, i, "🟩"), print(br - 1, i, "🟩");
 
-void move_snake(int x, int y){
-    snakeposx[snakelen] = x;
-    snakeposy[snakelen] = y;
-
-    totalboard[snakeposx[0]][snakeposy[0]] = 0;
-    totalboard[x][y] = 1;
-
-
-    gotoXY(snakeposx[0], snakeposy[0]); cout<<" ";
-    gotoXY(x, y, 'O');
-    gotoXY(snakeposx[snakelen-1], snakeposy[snakelen-1], (snakelen-1+f)&1?(char)248:'o');
-
-    for(int i=0; i<snakelen; i++)snakeposx[i]=snakeposx[i+1], snakeposy[i]=snakeposy[i+1];
-
-    f=!f;
-}
-
-void fruit_eaten(int x, int y){
-    point += 10;
-
-    snakeposx[snakelen] = x;
-    snakeposy[snakelen] = y;
-
-    gotoXY(x, y);totalboard[x][y]=1; cout<<"O";
-    gotoXY(snakeposx[snakelen-1], snakeposy[snakelen-1], (snakelen-1+f)&1?'ờ':'ợ'); 
-
-    snakelen++;
-    fruit(3);
-
-    if(point == targetpoint[stageh])gameover=1;
-}
-
-void key_press(){
-    int x = snakeposx[snakelen-1];
-    int y = snakeposy[snakelen-1];
-    if(_kbhit()){
-        cs=retch();
+        for(int i=0; i<br; i++)sp(i, 0, normal), sp(i, bc-1, normal);
+        for(int i=0; i<bc; i++)sp(0, i, normal), sp(br-1, i, normal);
     }
-    if(!(cs=='a' or cs=='s' or cs=='d' or cs=='w' or cs=='j'))cs = ch;
+    else if (stageh == campaign)
+    {
+        for (int i = 0; i < br; i++) print(i, -1, "🧱"), print(i, bc - 1, "🧱"); // |
+        for (int i = -1; i < bc; i += 2) print(0, i, "🧱"), print(br - 1, i, "🧱"); // _
 
-    else if(cs+ch==234 or cs+ch==197)cs=ch;
-
-    else if(cs == 'j'){
-        snake(0); fruit(0); brdr(0);
-        gotoXY(-2, 20);cout<<"                 ";
-        continuecontentpos = 0;
-        Control(5);
-        if(etg)return;
-        brdr(3);
-        cs=ch;
-    }
-    else ch = cs;
-
-
-    if(cs=='w')x--;
-    else if(cs=='s')x++;
-    else if(cs=='a')y-=2;
-    else if(cs=='d')y+=2;
-
-    if(uur and x==10 and y==30){
-        move_snake(x,y);
-        uur = 0;
-    }
-    else if(totalboard[x][y] == 1){
-        cout<<x<<' '<<y;getch();
-        gotoXY(bs+1,20);cout<<"         ";
-        gotoXY(snakeposx[snakelen-1], snakeposy[snakelen-1], 'X');
-        gameover=1;
-    }
-    else if(totalboard[x][y] == 2)fruit_eaten(x,y);
-    else if(totalboard[x][y] == 3){
-        if(x == 0)x=bs-2;
-        else if(x == bs-1)x=1;
-        else if(y == 0)y=2*bs-2;
-        else if(y == 2*bs)y=2;
-        if(totalboard[x][y] == 2)fruit_eaten(x,y);
-        else move_snake(x,y);
-    }
-    else move_snake(x,y);
-    gotoXY(-1,-1);
-}
-
-void game(bool key){
-    if(key){
-        game(0);
-        stages(stageh);
-        cs = 'd';
-        point = 0;
-        gameover = 0;
-        snakelen = 9;
-        uur=1;
-        snake(3);
-        fruit(3);
-        while(gameover == 0){
-            gotoXY(-2, 20, "+");
-            cout<<point<<"/"<<targetpoint[stageh];
-            snake(1);
-            fruit(1);
-            key_press();
-            if(etg)return;
-            usleep((2-levelh)*20000+80000);
-            snake(0);
-            fruit(0);
-            gotoXY(-2, 20);cout<<"                 ";
-            brdr(1);
-        }
-        gotoXY(-2, 20);cout<<"                 ";
-        brdr(0);
-        gotoXY(10, 10, point==targetpoint[stageh]?"You passed!    ":"Game Over!     ");cout<<point<<'/'<<targetpoint[stageh];
-        gotoXY(12, 10, "Press j to go to homepage");
-        gotoXY(14, 10, "Press x to go to next level");
-        gameover = 0;
-        point = 0;
-        game(0);
-        cs = retch();
-        for(;cs!='j' and cs!='x'; cs=retch());
-        gotoXY(10, 10);cout<<"                              ";
-        gotoXY(12, 10);cout<<"                           ";
-        gotoXY(14, 10);cout<<"                              ";
-
-        if(cs == 'j')Control(0);
-        else stageh++, Control(4);
-    }
-    else{
-        snake(0);
-        fruit(0);
-        for(int i=0; i<=22; i++)for(int j=0; j<=50; j++)totalboard[i][j]=0;
-    }
-}
-
-void brdr(int key){
-    vector<int> kkkk = consolemid();
-    if(key == 0 or kkkk != prevconsize){
-        for(int i=0; i<bs; i++)gotoXY(i, 0), cout<<' ';
-        for(int i=0; i<bs; i++)gotoXY(i, 2*bs), cout<<' ';
-        for(int i=0; i<=2*bs; i++)gotoXY(0,i), cout<<' ';
-        for(int i=0; i<=2*bs; i++)gotoXY(bs-1,i), cout<<' ';
-
-        for(int i=0; i<=2*bs; i++)gotoXY(6, i), cout<<' ';
-        for(int i=1; i<=6; i++)gotoXY(i, 16), cout<<' ';
-        for(int i=1; i<=6; i++)gotoXY(i, 17), cout<<' ';
-        for(int i=0; i<=2*bs; i++)gotoXY(bs-6, i), cout<<' ';
-
-        
-        for(int i=bs-6; i<bs; i++)gotoXY(i, 20), cout<<' ', totalboard[i][20]=0;
-        for(int i=bs-6; i<bs; i++)gotoXY(i, 21), cout<<' ', totalboard[i][21]=0;
-        for(int i=bs-3; i<bs; i++)gotoXY(i, 2*bs-1), cout<<' ', totalboard[i][2*bs-1]=0;
-        for(int i=bs-3; i<bs; i++)gotoXY(i, 2*bs), cout<<' ', totalboard[i][2*bs]=0, totalboard[i][0]=0;
-
-
-        string solid(10, ' ');
-        gotoXY(0,0,solid); gotoXY(bs-1,0), cout<<solid; gotoXY(0, 2*bs-9), cout<<solid; gotoXY(bs-1, 2*bs-9), cout<<solid;
-        for(int i=0; i<10; i++)totalboard[0][i] = totalboard[bs-1][i] = totalboard[0][2*bs-9+i] = totalboard[bs-1][2*bs-9+i] = 0;
-
-
-        if(key == 0){
-            for(int i=0; i<bs+1; i++)for(int j=0; j<=50; j++)totalboard[i][j]=0;
-            return;
-        }
-
-        stages(stageh);
-    }
-    else if(key == 3){
-        stages(stageh);
+        for(int i=0; i<br; i++)sp(i, 0, campaign), sp(i, bc-1, campaign);
+        for(int i=0; i<bc; i++)sp(0, i, campaign), sp(br-1, i, campaign);
 
     }
-}
+    else if (stageh == tunnel)
+    {
+        for(int i=0; i<br; i++)sp(i, 0, normal), sp(i, bc-1, normal);
+        for(int i=0; i<bc; i++)sp(0, i, normal), sp(br-1, i, normal);
 
 
 
+        for (int i = 11; i <= bc - 11; i += 2) print(7, i, "🧱"), print(br - 8, i, "🧱");
 
 
-void homepage(bool key){
-    if(key){
-        int i=1;
-        for(auto it: homepagecontent){
-            if(homepagecontentpos == i-1)gotoXY(i*5+1, (bdc - it.size() )/2 - 2, ">");
-            else gotoXY(i*5+1, (bdc - it.size() )/2 - 2, " ");
-            
-            gotoXY(i++*5+1, (bdc - it.size() )/2, it);
-        }
-    }
-    else{
-        int i=1;
-        for(auto it: homepagecontent){
-            gotoXY(i++*5+1, (bdc - it.size())/2 - 2), cout<<"                ";
-        }
-    }
-    gotoXY(22,20);
-}
 
-void continue_game(bool key){
-    if(key){
-        int i=1;
-        for(auto it: continuecontent){
-            if(continuecontentpos == i-1)gotoXY(i*4+1, (bdc - it.size() )/2 - 2, ">");
-            else gotoXY(i*4+1, (bdc - it.size() )/2 - 2, " ");
-            
-            gotoXY(i++*4+1, (bdc - it.size() )/2, it);
-        }
-    }
-    else{
-        int i=1;
-        for(auto it: continuecontent){
-            gotoXY(i++*4+1, (bdc - it.size())/2 - 2), cout<<"                ";
-        }
-    }
-    gotoXY(22,20);
-}
+        for(int i=1; i<=4; i++)print(i, -1, "🧱"), print(i, bc-1, "🧱"), print(br-1-i, -1, "🧱"), print(br-1-i, bc-1, "🧱");
+        for(int i=-1; i<=8; i+=2)print(0, i, "🧱"), print(br-1, i, "🧱"), print(0, bc-2-i, "🧱"), sp(0, bc-1-i, campaign), print(br-1, bc-2-i, "🧱"), sp(br-1, bc-1-i, campaign);
 
-void help(bool key){
-    int i=1;
-    if(key){
-        for(auto it: helpstr){
-            if(i>2)gotoXY(++i+1, 5, it);
-            else gotoXY(++i+1, (bdc - it.size())/2, it );
-        }
-    }
-    else{
-        for(auto it: helpstr){
-            string s(it.size(), ' ');
-            if(i>2)gotoXY(++i+1, 5), cout<<s;
-            else gotoXY(++i+1, (bdc - it.size())/2), cout<<s;
-        }
-    }
-}
 
-void level(bool key){
-    if(key){
-        string dots(16, '.'), updots(16, '\''), str(5*levelh+5, (char)219), strr(5*(2-levelh), ' ');
-        str += strr;
-        gotoXY(9, 13, dots);
-        gotoXY(10,13, "|");
-        gotoXY(10, 14, str);
-        gotoXY(10, 28, "|");
-        gotoXY(11, 13, updots);
     }
-    else{
-        string dots(17, ' ');
-        gotoXY(9, 13); cout<<dots;
-        gotoXY(10,13); cout<<dots;
-        gotoXY(11, 13); cout<<dots;
-    }
-}
+    else if(stageh == apartment){
+        for(int i=0; i<br; i++)sp(i, 0, normal), sp(i, bc-1, normal);
+        for(int i=0; i<bc; i++)sp(0, i, normal), sp(br-1, i, normal);
 
-void stage(bool key){
-    if(key){
-        int i=1;
-        for(auto it: stagestr){
-            if(stageh == i-1)gotoXY(i*2+4, i*5, ">");
-            gotoXY(i*2+4,i*5+2,it);
-            i++;
-        }
-    }
-    else{
-        int i=1;
-        for(auto it: stagestr){
-            string s(it.size()+2, ' ');
-            gotoXY(i*2+4,i*5);cout<<s;
-            i++;
-        }
+        for (int i = -1; i <= bc; i += 2) print(7, i, "🧱"), i<20?print(br-8, i, "🧱"):nothing() ,i> 32 ? print(br - 8, i-1, "🧱"),sp(br-8, i, campaign) : 1;
+        for (int i = 0; i < 8; i++) print(i, 13, "🧱");
+
+        for(int i=1; i<=4; i++)print(i, -1, "🧱"), print(i, bc-1, "🧱"), print(br-1-i, -1, "🧱"), print(br-1-i, bc-1, "🧱");
+        for(int i=-1; i<=8; i+=2)print(0, i, "🧱"), print(br-1, i, "🧱"), print(0, bc-2-i, "🧱"), sp(0, bc-1-i, campaign), print(br-1, bc-2-i, "🧱"), sp(br-1, bc-1-i, campaign);
+
     }
 }
 
 int main(){
+    ifstream danzo("Snake_Game_Score.txt");
+    if(danzo.good()==0){
+        danzo.close();
+        ofstream danzo("Snake_Game_Score.txt");
+        danzo<<0;
+        danzo.close();
+    }
+    else {
+        string strd;
+        getline(danzo, strd);
+        const char* sttr = strd.c_str();
+        sscanf(sttr, "%d", &highscore);
+        danzo.close();
+    }
 
-    prevconsize = consolemid();
-
-    cs = ch = 'd';
-    Control(0);
-    // game(1);
+    // game(1); 
+    // system("clear");
+    new_console_size();
+    // printarr(homestr);
+    // getch();
+    // system("clear");
+    // printarr(helpstr);
+    control();
 }
+
+void printarr(vector<string> vec){
+    cs = 'o';int it=0, veclen = vec.size();
+    if(!tw){
+        it = 1;
+        if(pointpos == 0)pointpos = -1;
+    }
+    if(pointpos == -1)pointpos = vec.size()-1;
+    if(pointpos == vec.size())pointpos = tw?0:1;
+    int skp = br/veclen;
+    int row = 11 - skp*(veclen/2);
+    for(; it<veclen; it++){
+        print(row, bc/2-vec[it].size()/2, vec[it]);
+        if(veclen<8 and it==pointpos) print(row,bc/2-vec[it].size()/2-2,'>');
+
+        row += skp;
+    }
+    print(br+2, bc/2, "");
+
+    while(1){
+        if(_kbhit()){
+            cs = getch();
+            if(cs == 's' or cs == 'd')pointpos++;
+            else if(cs == 'a' or cs == 'w')pointpos--;
+            else if(cs == 'j'){system("clear");return;}
+            else continue;
+            system("clear");
+            printarr(vec);
+            return;
+        }
+        int precol=wincol, prerow=winrow;
+        wincol=WEXITSTATUS(std::system("exit `tput cols`"));
+        winrow = WEXITSTATUS(std::system("exit `tput lines`"));
+        if(precol-wincol or prerow-winrow){
+            system("clear");
+            printarr(vec);
+            return;
+        }
+    }
+}
+
+void control(){
+    if(exit_the_game == 1)return;
+    printarr(homestr);
+    if(pointpos == 1){
+        stageh = normal;
+        tw = 1;
+        printarr(levelstr);
+        level = pointpos;
+        game(1);
+        control();
+        return;
+    }
+    else if(pointpos == 2){
+        system("clear");
+        print(br/2, bc/2, "");
+        cout<<highscore;
+        print(br+2, bc/2, "");
+        getch();
+        system("clear");
+        control();
+        return;
+    }
+    else if(pointpos == 3){
+        printarr(helpstr);
+        control();
+        return;
+    }
+    else if(pointpos == 4 or pointpos == 0){exit_the_game=1; system("clear");return;}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void lives_and_points(int key)
+{
+    if (key == erase) {
+        print(-3, bc / 2 - 12, "                               ");
+        print(-2, bc / 2 - 6, "                               ");
+
+    }
+
+    
+    if (key == draw) {
+        lives_and_points(erase);
+        print(-3, bc / 2 - 12, " ");
+        cout << "Remaining Lives = " << lives[0] * 10;
+        print(-2, bc/2-2, "");
+        cout<<points[stageh]<<" / "<<point;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void print(int row, int col, string str)
+{
+    printf("\033[%d;%dH", row+winrow/2-10, col+wincol/2-20);
+    if(str!="erase")cout<<str;
+    if(col == -1)col=0;
+    if(str =="🧱")sp(row, col, campaign);
+    else if(str=="erase")sp(row, col, 0), cout<<' ';
+    else if(str == "O")sp(row, col, snakes);
+    else if(str == "🐸")sp(row, col, fruits);
+    else if(str == "🦅")sp(row, col, eagles);
+}
+
+
+void erasef(int row, int col, string str)
+{
+    printf("\033[%d;%dH", row+winrow/2-10, col+wincol/2-23);
+    cout<<str;
+}
+
+void print(int row, int col, char str)
+{
+    printf("\033[%d;%dH%c", row+winrow/2-10, col+wincol/2-20, str);
+}
+
+
+void erasef(int row, int col)
+{
+    printf("\033[%d;%dH ", row+winrow/2-10, col+wincol/2-23);
+}
+
+void new_console_size(){
+    int precol=wincol, prerow=winrow;
+    wincol=WEXITSTATUS(std::system("exit `tput cols`"));
+    winrow = WEXITSTATUS(std::system("exit `tput lines`"));
+    if(precol-wincol or prerow-winrow){
+        if(tw)draw_afresh();
+        else system("clear");
+    }
+
+}
+
+void draw_afresh(){
+    system("clear");
+    snake(draw);
+    fruit(draw);
+    eagle(draw);
+    board();
+}
+
