@@ -1,1 +1,3 @@
 # Snake_Game
+
+<code>Download the Basic_console_feature.h and save it to the folder the cpp file of the game is downloaded... Compile it and then it will work...
