@@ -62,5 +62,5 @@ int main()
         cout<<"\nTotal Point : "<<f[3]<<'\n';
         Sleep(30);
     }
-    cout<<"Game Over!!!\n";
+    cout<<"Game Over!!!\n"; 
 }
